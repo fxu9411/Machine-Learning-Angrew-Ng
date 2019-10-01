@@ -63,21 +63,65 @@ Theta2_grad = zeros(size(Theta2));
 %
 
 
+% Part 1
+
+a1 = X;
+
+a1 = [ones(m, 1) a1];
+
+z2 = a1 * Theta1';
+
+a2 = sigmoid(z2);
+
+a2 = [ones(m, 1) a2];
+
+z3 = a2 * Theta2';
+
+a3 = sigmoid(z3);
+
+h = a3;
+
+%%  recode the labels as vectors containing only values 0 or 1 - ?
+y_new = zeros(m, num_labels); % 5000 * 10
+
+for i=1:m
+  y_new(i, y(i)) = 1;
+endfor
 
 
+J = (-1 / m) * sum(sum((y_new .* log(h)) + ((1 .- y_new) .* log(1 - h)))) ...
+  + lambda / (2 * m) * ((sum(sum(Theta1(:,2:end) .^ 2))) ...
+                      + (sum(sum(Theta2(:,2:end) .^ 2))));
+  
 
+% Part 2
 
+for i = 1:m
+  % L = 1
+  a1 = [1; X(i,:)'];
+  
+  % L = 2
+  z2 = Theta1 * a1;
+  a2 = [1; sigmoid(z2)];
+  
+  % L = 3
+  z3 = Theta2 * a2;
+  a3 = sigmoid(z3);
+  
+  yy = ([1:num_labels]==y(i))'; %?
+  
+  % Delta
+  delta3 = a3 - yy;
+  delta2 = (Theta2' * delta3) .* [1; sigmoidGradient(z2)];
+  delta2 = delta2(2:end);
+  
+  Theta1_grad = Theta1_grad + delta2 * a1';
+  Theta2_grad = Theta2_grad + delta3 * a2';
+  
+endfor
 
-
-
-
-
-
-
-
-
-
-
+Theta1_grad = (1 / m) * (Theta1_grad + lambda * [zeros(size(Theta1, 1), 1) Theta1(:,2:end)]);
+Theta2_grad = (1 / m) * (Theta2_grad + lambda * [zeros(size(Theta2, 1), 1) Theta2(:,2:end)]);
 
 
 % -------------------------------------------------------------
